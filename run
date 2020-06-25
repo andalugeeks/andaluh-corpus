@@ -1,0 +1,52 @@
+#!/bin/bash
+# -*- coding: utf-8 -*-
+# vim: ts=4
+###
+#
+# Automates the download and transliteration of europarl-v7 corpus
+# from statmt.org site
+# 
+# Useful as a reminder script of how the process was done
+#
+# Copyright (c) 2020 Andalugeeks
+# Authors:
+# - J. Félix Ontañón <felixonta@gmail.com>
+
+echo "[*] Creating virtenv"
+python3 -m venv .env
+source .env/bin/activate
+pip3 install -r requirements.txt
+
+
+echo "[*] Downloading europarl-v7"
+mkdir -p europarl
+cd europarl
+wget -c http://www.statmt.org/europarl/v7/es-en.tgz
+
+echo "[*] Uncompressing europarl-v7"
+tar zxvf es-en.tgz
+
+echo "[*] Replacing some 'ı' char with 'i' because andaluh script does not support that"
+sed -i "s/ı/i/g" europarl-v7.es-en.es
+
+echo "[*] Splitting into 90M chunks (github max file size is 100M)"
+split -b 90M europarl-v7.es-en.es europarl-v7.es-en.es.
+
+echo "[1/4] Transliterating to standard (this can take some minutes)"
+for i in europarl-v7.es-en.es.aa europarl-v7.es-en.es.ab europarl-v7.es-en.es.ac europarl-v7.es-en.es.ad; do andaluh -i $i > $i.and; done
+
+echo "[2/4] Transliterating to zezeo [2/4] (this can take some minutes)"
+for i in europarl-v7.es-en.es.aa europarl-v7.es-en.es.ab europarl-v7.es-en.es.ac europarl-v7.es-en.es.ad; do andaluh -e z -i $i > $i.andz; done
+
+echo "[3/4] Transliterating to seseo (this can take some minutes)"
+for i in europarl-v7.es-en.es.aa europarl-v7.es-en.es.ab europarl-v7.es-en.es.ac europarl-v7.es-en.es.ad; do andaluh -e s -i $i > $i.ands; done
+
+echo "[4/4] Transliterating to heheo (this can take some minutes)"
+for i in europarl-v7.es-en.es.aa europarl-v7.es-en.es.ab europarl-v7.es-en.es.ac europarl-v7.es-en.es.ad; do andaluh -e h -i $i > $i.andh; done
+
+echo "[*] Finish! Exiting ..."
+rm es-en.tgz
+rm europarl-v7.es-en.en  europarl-v7.es-en.es
+deactivate
+cd ..
+exit

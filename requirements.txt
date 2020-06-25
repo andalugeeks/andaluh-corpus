@@ -1,0 +1,2 @@
+requests
+git+https://github.com/andalugeeks/andaluh-py.git@db956a90654fbd161f0fa8b8028825b7755395c1
